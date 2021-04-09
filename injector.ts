@@ -35,10 +35,6 @@ export function injectable<T, DepKeys extends readonly InjectKey<unknown>[]>(
   return key;
 }
 
-function getInjectableData<T>(key: InjectKey<T>) {
-  return metadata.get(key) as InjectableData<T>;
-}
-
 export const InjectorKey: InjectKey<Injector> = new InjectKey('Injector');
 
 export class Injector {
@@ -59,7 +55,7 @@ export class Injector {
   }
 
   private create<T>(key: InjectKey<T>): T {
-    const { factory, deps } = getInjectableData(key);
+    const { factory, deps } = metadata.get(key) as InjectableData<T>;
     const depValues = deps.map(dep => this.get(dep));
     return factory(...depValues);
   }
