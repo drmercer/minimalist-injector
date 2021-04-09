@@ -1,12 +1,12 @@
 import { injectable, Injector, InjectorKey } from './injector';
 
-const A = injectable('A', [], () => {
+const A = injectable('A', () => {
   return {
     foo: 'a',
   };
 });
 
-const B = injectable('B', [A] as const, (a) => {
+const B = injectable('B', A, (a) => {
   function getA(): unknown {
     return a;
   }
@@ -17,7 +17,7 @@ const B = injectable('B', [A] as const, (a) => {
   };
 });
 
-const C = injectable('C', [A, B, InjectorKey] as const, (a, b, injector) => {
+const C = injectable('C', A, B, InjectorKey, (a, b, injector) => {
   return {
     bagel: 'c' + a.foo + b.bar,
     injector,

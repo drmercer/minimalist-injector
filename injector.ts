@@ -6,10 +6,8 @@ class InjectableKey<T> {
 }
 export type { InjectableKey };
 
-type InjectableValue<IK> = IK extends InjectableKey<infer T> ? T : never;
-
 type InjectableValues<Deps> = {
-  [K in keyof Deps]: InjectableValue<Deps[K]>;
+  [K in keyof Deps]: Deps[K] extends InjectableKey<infer T> ? T : never;
 }
 
 interface InjectableData<T> {
@@ -19,11 +17,20 @@ interface InjectableData<T> {
 
 const metadata = new WeakMap<InjectableKey<unknown>, InjectableData<unknown>>();
 
-export function injectable<T, Deps extends readonly InjectableKey<unknown>[]>(name: string, deps: Deps, factory: (...args: InjectableValues<Deps>) => T): InjectableKey<T> {
+export function injectable<T, Deps extends readonly InjectableKey<unknown>[]>(
+  name: string,
+  // Makes me sad that this signature isn't very clean, but at least it's user-friendly and doesn't require "as const"
+  ...rest: [
+    ...deps: Deps,
+    factory: (...args: InjectableValues<Deps>) => T,
+  ]
+): InjectableKey<T> {
+  const deps = rest.slice(0, -1);
+  const [factory] = rest.slice(-1);
   const key = new InjectableKey<T>(name);
   metadata.set(key, {
-    deps,
-    factory,
+    deps: deps as unknown as Deps,
+    factory: factory as (...args: InjectableValues<Deps>) => T,
   });
   return key;
 }
