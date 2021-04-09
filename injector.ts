@@ -1,33 +1,33 @@
-class InjectableKey<T> {
-  private IfYoureSeeingThisInAnErrorMessageItMeansYoureTryingToUseSomethingAsAnInjectableKeyWhenItsNotOne!: T;
+class InjectKey<T> {
+  private IfYoureSeeingThisInAnErrorMessageItMeansYoureTryingToUseSomethingAsAnInjectKeyWhenItsNotOne!: T;
   constructor(
     public injectableName: string,
   ) { }
 }
-export type { InjectableKey };
+export type { InjectKey };
 
 type InjectableValues<Deps> = {
-  [K in keyof Deps]: Deps[K] extends InjectableKey<infer T> ? T : never;
+  [K in keyof Deps]: Deps[K] extends InjectKey<infer T> ? T : never;
 }
 
 interface InjectableData<T> {
-  deps: readonly InjectableKey<unknown>[];
+  deps: readonly InjectKey<unknown>[];
   factory: (...args: any) => T;
 }
 
-const metadata = new WeakMap<InjectableKey<unknown>, InjectableData<unknown>>();
+const metadata = new WeakMap<InjectKey<unknown>, InjectableData<unknown>>();
 
-export function injectable<T, Deps extends readonly InjectableKey<unknown>[]>(
+export function injectable<T, Deps extends readonly InjectKey<unknown>[]>(
   name: string,
   // Makes me sad that this signature isn't very clean, but at least it's user-friendly and doesn't require "as const"
   ...rest: [
     ...deps: Deps,
     factory: (...args: InjectableValues<Deps>) => T,
   ]
-): InjectableKey<T> {
+): InjectKey<T> {
   const deps = rest.slice(0, -1);
   const [factory] = rest.slice(-1);
-  const key = new InjectableKey<T>(name);
+  const key = new InjectKey<T>(name);
   metadata.set(key, {
     deps: deps as unknown as Deps,
     factory: factory as (...args: InjectableValues<Deps>) => T,
@@ -35,18 +35,18 @@ export function injectable<T, Deps extends readonly InjectableKey<unknown>[]>(
   return key;
 }
 
-function getInjectableData<T>(key: InjectableKey<T>) {
+function getInjectableData<T>(key: InjectKey<T>) {
   return metadata.get(key) as InjectableData<T>;
 }
 
-export const InjectorKey: InjectableKey<Injector> = new InjectableKey('Injector');
+export const InjectorKey: InjectKey<Injector> = new InjectKey('Injector');
 
 export class Injector {
-  private instances: WeakMap<InjectableKey<unknown>, any> = new WeakMap();
+  private instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
 
   constructor() { }
 
-  public get<T>(key: InjectableKey<T>): T {
+  public get<T>(key: InjectKey<T>): T {
     if (this.instances.has(key)) {
       return this.instances.get(key);
     }
@@ -58,7 +58,7 @@ export class Injector {
     return instance;
   }
 
-  private create<T>(key: InjectableKey<T>): T {
+  private create<T>(key: InjectKey<T>): T {
     const { factory, deps } = getInjectableData(key);
     const depValues = deps.map(dep => this.get(dep));
     return factory(...depValues);
