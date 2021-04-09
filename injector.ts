@@ -43,15 +43,10 @@ export const InjectorKey: InjectableKey<Injector> = new InjectableKey('Injector'
 
 export class Injector {
   private instances: WeakMap<InjectableKey<unknown>, any> = new WeakMap();
-  /** Only for usage from debugger */
-  private byName: Record<string, any> | undefined = this.debug ? {} : undefined;
 
-  constructor(private debug: boolean = false) { }
+  constructor() { }
 
   public get<T>(key: InjectableKey<T>): T {
-    if (this.byName && typeof key === 'string') {
-      return this.byName[key];
-    }
     if (this.instances.has(key)) {
       return this.instances.get(key);
     }
@@ -60,9 +55,6 @@ export class Injector {
     }
     const instance = this.create(key);
     this.instances.set(key, instance);
-    if (this.byName) {
-      this.byName[key.injectableName] = instance;
-    }
     return instance;
   }
 
