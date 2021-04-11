@@ -6,8 +6,10 @@ class InjectKey<T> {
 }
 export type { InjectKey };
 
+export type InjectedValue<K extends InjectKey<unknown>> = K extends InjectKey<infer T> ? T : never;
+
 type DepValues<DepKeys extends readonly InjectKey<unknown>[]> = {
-  [K in keyof DepKeys]: DepKeys[K] extends InjectKey<infer T> ? T : never;
+  [K in keyof DepKeys]: DepKeys[K] extends InjectKey<unknown> ? InjectedValue<DepKeys[K]> : never;
 }
 
 interface InjectableData<T> {
@@ -37,12 +39,48 @@ export function injectable<T, DepKeys extends readonly InjectKey<unknown>[]>(
 
 export const InjectorKey: InjectKey<Injector> = new InjectKey('Injector');
 
+export interface Override<T> {
+  overridden: InjectKey<T>;
+  overrider: InjectKey<T>;
+}
+
+export function override<T>(overridden: InjectKey<T>) {
+  return {
+    withOther(overrider: InjectKey<T>): Override<T> {
+      return { overridden, overrider };
+    },
+    withValue(value: T): Override<T> {
+      return {
+        overridden,
+        overrider: injectable<T, []>('explicit value', () => value),
+      };
+    },
+  };
+}
+
 export class Injector {
   private instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
+  private overrides: Map<InjectKey<unknown>, InjectKey<unknown>>;
 
-  constructor() { }
+  constructor(overrides: Override<unknown>[] = []) {
+    this.overrides = new Map(overrides.map(o => [o.overridden, o.overrider]));
+  }
 
   public get<T>(key: InjectKey<T>): T {
+    return this._get(key, []);
+  }
+
+  private _get<T>(key: InjectKey<T>, overriddenKeys: InjectKey<T>[]): T {
+    if (this.overrides.has(key)) {
+      const overrider = this.overrides.get(key) as InjectKey<T>;
+      const newOverriddenKeys = [...overriddenKeys, key];
+      // Check for circular dependency
+      if (newOverriddenKeys.includes(overrider)) {
+        const message: string = [...newOverriddenKeys, overrider].map(k => k.injectableName).join(' -> ');
+        throw new Error("Circular override dependencies: " + message);
+      }
+      return this._get(overrider, newOverriddenKeys);
+    }
     if (this.instances.has(key)) {
       return this.instances.get(key);
     }
