@@ -1,18 +1,22 @@
-import { injectable, InjectedValue, InjectKey, Injector, InjectorKey, override } from './injector';
+import { injectable, InjectKey, Injector, InjectorKey, override } from './injector';
 
-const A = injectable('A', () => {
+interface A {
+  foo: string;
+}
+
+const A: InjectKey<A> = injectable('A', () => {
   return {
     foo: 'a',
   };
 });
 
-const A2: InjectKey<InjectedValue<typeof A>> = injectable('A2', () => {
+const A2: InjectKey<A> = injectable('A2', () => {
   return {
     foo: 'a2',
   };
 });
 
-const A3: InjectKey<InjectedValue<typeof A>> = injectable('A3', () => {
+const A3: InjectKey<A> = injectable('A3', () => {
   return {
     foo: 'a3',
   };
@@ -29,10 +33,13 @@ const B = injectable('B', A, (a) => {
   };
 });
 
-const C = injectable('C', A, B, InjectorKey, (a, b, injector) => {
+const OptionalA: InjectKey<A | undefined> = injectable('OptionalA', () => undefined);
+
+const C = injectable('C', A, B, InjectorKey, OptionalA, (a: A, b, injector, maybeA?: A) => {
   return {
     bagel: 'c' + a.foo + b.bar,
     injector,
+    hasOptionalA: maybeA !== undefined,
   };
 });
 
@@ -79,6 +86,7 @@ describe('injector v2', () => {
 
     expect(b.getA()).toBe(a);
     expect(c.injector).toBe(injector);
+    expect(c.hasOptionalA).toBe(false);
   })
 
   it('should allow overriding with key', () => {
@@ -95,6 +103,15 @@ describe('injector v2', () => {
 
     expect(b.getA()).toBe(a);
     expect(c.injector).toBe(injector);
+  })
+
+  it('should allow overriding with key (optional dep, for demonstration)', () => {
+    const injector = new Injector([
+      override(OptionalA).withOther(A),
+    ]);
+    const c = injector.get(C);
+
+    expect(c.hasOptionalA).toEqual(true);
   })
 
   it('should allow overriding with value', () => {
