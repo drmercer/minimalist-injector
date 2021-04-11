@@ -37,8 +37,6 @@ export function injectable<T, DepKeys extends readonly InjectKey<unknown>[]>(
   return key;
 }
 
-export const InjectorKey: InjectKey<Injector> = new InjectKey('Injector');
-
 export interface Override<T> {
   overridden: InjectKey<T>;
   overrider: InjectKey<T>;
@@ -59,6 +57,8 @@ export function override<T>(overridden: InjectKey<T>) {
 }
 
 export class Injector {
+  public static Self: InjectKey<Injector> = new InjectKey('Injector');
+
   private instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
   private overrides: Map<InjectKey<unknown>, InjectKey<unknown>>;
 
@@ -84,7 +84,7 @@ export class Injector {
     if (this.instances.has(key)) {
       return this.instances.get(key);
     }
-    if (key === InjectorKey as unknown) {
+    if (key === Injector.Self as InjectKey<unknown>) {
       return this as unknown as T;
     }
     const instance = this.create(key);

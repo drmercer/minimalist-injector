@@ -1,4 +1,4 @@
-import { injectable, InjectKey, Injector, InjectorKey, override } from './injector';
+import { injectable, InjectKey, Injector, override } from './injector';
 
 interface A {
   foo: string;
@@ -35,7 +35,7 @@ const B = injectable('B', A, (a) => {
 
 const OptionalA: InjectKey<A | undefined> = injectable('OptionalA', () => undefined);
 
-const C = injectable('C', A, B, InjectorKey, OptionalA, (a: A, b, injector, maybeA?: A) => {
+const C = injectable('C', A, B, Injector.Self, OptionalA, (a: A, b, injector, maybeA?: A) => {
   return {
     bagel: 'c' + a.foo + b.bar,
     injector,
@@ -52,11 +52,16 @@ new Injector([
 ]);
 
 // @ts-expect-error Should properly type the InjectKey based on the return value of the factory fn
-const BadReturnValue: InjectKey<{ a: boolean }> = injectable('BadReturnValue', A, B, InjectorKey, (a, b, injector) => {
-  return {
-    b: true,
-  };
-});
+const BadReturnValue: InjectKey<{ a: boolean }> = injectable(
+  'BadReturnValue',
+  A,
+  B,
+  Injector.Self,
+  (a, b, injector) => {
+    return {
+      b: true,
+    };
+  });
 
 // @ts-expect-error Should complain if extra deps are expected
 const UndeclaredDep = injectable('UndeclaredDep', A, (a, b) => {
