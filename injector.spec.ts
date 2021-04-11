@@ -4,6 +4,8 @@ interface A {
   foo: string;
 }
 
+// The following 3 injectables all provide an implementation of the "A" interface
+
 const A: InjectKey<A> = injectable('A', () => {
   return {
     foo: 'a',
@@ -22,6 +24,8 @@ const A3: InjectKey<A> = injectable('A3', () => {
   };
 });
 
+// Using a named interface for an injectable is nice, but not necessary - here's an example where TS
+// just infers the InjectKey's type from the factory function's return value:
 const B = injectable('B', A, (a) => {
   function getA(): unknown {
     return a;
@@ -33,8 +37,12 @@ const B = injectable('B', A, (a) => {
   };
 });
 
+// This demonstrates how to express an optional dependency - just use a key that defaults to undefined, and
+// then override it in the injector if needed
 const OptionalA: InjectKey<A | undefined> = injectable('OptionalA', () => undefined);
 
+// This demonstrates another advanced usage - injecting the injector. This allows C to do injection at
+// runtime by calling injector.get().
 const C = injectable('C', A, B, Injector.Self, OptionalA, (a: A, b, injector, maybeA?: A) => {
   return {
     bagel: 'c' + a.foo + b.bar,
