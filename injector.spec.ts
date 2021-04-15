@@ -62,10 +62,7 @@ new Injector([
 // @ts-expect-error Should properly type the InjectKey based on the return value of the factory fn
 const BadReturnValue: InjectKey<{ a: boolean }> = injectable(
   'BadReturnValue',
-  A,
-  B,
-  Injector.Self,
-  (a, b, injector) => {
+  () => {
     return {
       b: true,
     };
