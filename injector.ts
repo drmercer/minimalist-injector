@@ -50,7 +50,7 @@ export function override<T>(overridden: InjectKey<T>) {
     withValue(value: T): Override<T> {
       return {
         overridden,
-        overrider: injectable<T, []>('explicit value', () => value),
+        overrider: injectable<T, []>(`<explicit value overriding ${overridden.injectableName}>`, () => value),
       };
     },
   };
