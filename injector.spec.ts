@@ -26,7 +26,8 @@ const A3 = injectable('A3', (): A => {
 
 // Using a named interface for an injectable is nice, but not necessary - here's an example where TS
 // just infers the InjectKey's type from the factory function's return value:
-const B = injectable('B', A, (a) => {
+const B = injectable('B', (inject) => {
+  const a = inject(A);
   function getA(): A {
     return a;
   }
@@ -42,8 +43,12 @@ const B = injectable('B', A, (a) => {
 const OptionalA: InjectKey<A | undefined> = injectable('OptionalA', () => undefined);
 
 // This demonstrates another advanced usage - injecting the injector. This allows C to do injection at
-// runtime by calling injector.get().
-const C = injectable('C', A, B, Injector.Self, OptionalA, (a: A, b, injector, maybeA?: A) => {
+// runtime by calling injector.get(). TODO is there even a reason to do this now that we have inject()...?
+const C = injectable('C', (inject) => {
+  const a = inject(A);
+  const b = inject(B);
+  const injector = inject(Injector.Self);
+  const maybeA = inject(OptionalA);
   return {
     bagel: 'c' + a.foo + b.bar,
     injector,
