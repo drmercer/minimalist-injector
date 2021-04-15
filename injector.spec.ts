@@ -6,19 +6,19 @@ interface A {
 
 // The following 3 injectables all provide an implementation of the "A" interface
 
-const A: InjectKey<A> = injectable('A', () => {
+const A = injectable('A', (): A => {
   return {
     foo: 'a',
   };
 });
 
-const A2: InjectKey<A> = injectable('A2', () => {
+const A2 = injectable('A2', (): A => {
   return {
     foo: 'a2',
   };
 });
 
-const A3: InjectKey<A> = injectable('A3', () => {
+const A3 = injectable('A3', (): A => {
   return {
     foo: 'a3',
   };
@@ -27,7 +27,7 @@ const A3: InjectKey<A> = injectable('A3', () => {
 // Using a named interface for an injectable is nice, but not necessary - here's an example where TS
 // just infers the InjectKey's type from the factory function's return value:
 const B = injectable('B', A, (a) => {
-  function getA(): unknown {
+  function getA(): A {
     return a;
   }
 
