@@ -26,7 +26,8 @@ const A3 = injectable('A3', (): A => {
 
 // Using a named interface for an injectable is nice, but not necessary - here's an example where TS
 // just infers the InjectKey's type from the factory function's return value:
-const B = injectable('B', A, (a) => {
+const B = injectable('B', (inject) => {
+  const a = inject(A);
   function getA(): A {
     return a;
   }
@@ -41,12 +42,12 @@ const B = injectable('B', A, (a) => {
 // then override it in the injector if needed
 const OptionalA: InjectKey<A | undefined> = injectable('OptionalA', () => undefined);
 
-// This demonstrates another advanced usage - injecting the injector. This allows C to do injection at
-// runtime by calling injector.get().
-const C = injectable('C', A, B, Injector.Self, OptionalA, (a: A, b, injector, maybeA?: A) => {
+const C = injectable('C', (inject) => {
+  const a = inject(A);
+  const b = inject(B);
+  const maybeA = inject(OptionalA);
   return {
     bagel: 'c' + a.foo + b.bar,
-    injector,
     hasOptionalA: maybeA !== undefined,
   };
 });
@@ -95,7 +96,6 @@ describe('injector v2', () => {
     expect(c.bagel).toEqual('caba');
 
     expect(b.getA()).toBe(a);
-    expect(c.injector).toBe(injector);
     expect(c.hasOptionalA).toBe(false);
   })
 
@@ -112,7 +112,6 @@ describe('injector v2', () => {
     expect(c.bagel).toEqual('ca2ba2');
 
     expect(b.getA()).toBe(a);
-    expect(c.injector).toBe(injector);
   })
 
   it('should allow overriding with key (optional dep, for demonstration)', () => {
@@ -137,7 +136,6 @@ describe('injector v2', () => {
     expect(c.bagel).toEqual('cAbA');
 
     expect(b.getA()).toBe(a);
-    expect(c.injector).toBe(injector);
   })
 
   it('should throw if override loop exists', () => {

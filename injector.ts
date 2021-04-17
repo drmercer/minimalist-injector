@@ -8,31 +8,19 @@ export type { InjectKey };
 
 export type InjectedValue<K extends InjectKey<unknown>> = K extends InjectKey<infer T> ? T : never;
 
-type DepValues<DepKeys extends readonly InjectKey<unknown>[]> = {
-  [K in keyof DepKeys]: DepKeys[K] extends InjectKey<unknown> ? InjectedValue<DepKeys[K]> : never;
-}
-
 interface InjectableData<T> {
-  deps: readonly InjectKey<unknown>[];
-  factory: (...args: any) => T;
+  factory: (inject: <U>(key: InjectKey<U>) => U) => T;
 }
 
 const metadata = new WeakMap<InjectKey<unknown>, InjectableData<unknown>>();
 
-export function injectable<T, DepKeys extends readonly InjectKey<unknown>[]>(
+export function injectable<T>(
   name: string,
-  // Makes me sad that this signature isn't very clean, but at least it's user-friendly and doesn't require "as const"
-  ...rest: [
-    ...deps: DepKeys,
-    factory: (...args: DepValues<DepKeys>) => T,
-  ]
+  factory: (inject: <U>(key: InjectKey<U>) => U) => T,
 ): InjectKey<T> {
-  const deps = rest.slice(0, -1);
-  const [factory] = rest.slice(-1);
   const key = new InjectKey<T>(name);
   metadata.set(key, {
-    deps: deps as unknown as DepKeys,
-    factory: factory as (...args: DepValues<DepKeys>) => T,
+    factory,
   });
   return key;
 }
@@ -50,15 +38,13 @@ export function override<T>(overridden: InjectKey<T>) {
     withValue(value: T): Override<T> {
       return {
         overridden,
-        overrider: injectable<T, []>(`<explicit value overriding ${overridden.injectableName}>`, () => value),
+        overrider: injectable<T>(`<explicit value overriding ${overridden.injectableName}>`, () => value),
       };
     },
   };
 }
 
 export class Injector {
-  public static Self: InjectKey<Injector> = new InjectKey('Injector');
-
   private instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
   private overrides: Map<InjectKey<unknown>, InjectKey<unknown>>;
 
@@ -84,17 +70,13 @@ export class Injector {
     if (this.instances.has(key)) {
       return this.instances.get(key);
     }
-    if (key === Injector.Self as InjectKey<unknown>) {
-      return this as unknown as T;
-    }
     const instance = this.create(key);
     this.instances.set(key, instance);
     return instance;
   }
 
   private create<T>(key: InjectKey<T>): T {
-    const { factory, deps } = metadata.get(key) as InjectableData<T>;
-    const depValues = deps.map(dep => this.get(dep));
-    return factory(...depValues);
+    const { factory } = metadata.get(key) as InjectableData<T>;
+    return factory(this.get.bind(this));
   }
 }
