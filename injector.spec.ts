@@ -1,4 +1,4 @@
-import { injectable, InjectKey, Injector, override } from './injector';
+import { injectable, InjectKey, makeInjector, override } from './injector';
 
 interface A {
   foo: string;
@@ -55,7 +55,7 @@ const C = injectable('C', (inject) => {
 // Type tests:
 
 // Should only be able to override a key with a key/value assignable to it
-new Injector([
+makeInjector([
   // @ts-expect-error Should reject because doesn't include `foo: string`
   override(A).withValue({ foo2: 'A' }),
 ]);
@@ -87,10 +87,10 @@ const MisdeclaredDep = injectable('MisdeclaredDep', A, (a: { bar: string }) => {
 
 describe('injector v2', () => {
   it('should work', () => {
-    const injector = new Injector();
-    const c = injector.get(C);
-    const b = injector.get(B)
-    const a = injector.get(A);
+    const [inject] = makeInjector();
+    const c = inject(C);
+    const b = inject(B)
+    const a = inject(A);
 
     expect(b.bar).toEqual('ba');
     expect(c.bagel).toEqual('caba');
@@ -100,12 +100,12 @@ describe('injector v2', () => {
   })
 
   it('should allow overriding with key', () => {
-    const injector = new Injector([
+    const [inject] = makeInjector([
       override(A).withOther(A2),
     ]);
-    const c = injector.get(C);
-    const b = injector.get(B)
-    const a = injector.get(A);
+    const c = inject(C);
+    const b = inject(B)
+    const a = inject(A);
 
     expect(a.foo).toEqual('a2');
     expect(b.bar).toEqual('ba2');
@@ -115,21 +115,21 @@ describe('injector v2', () => {
   })
 
   it('should allow overriding with key (optional dep, for demonstration)', () => {
-    const injector = new Injector([
+    const [inject] = makeInjector([
       override(OptionalA).withOther(A),
     ]);
-    const c = injector.get(C);
+    const c = inject(C);
 
     expect(c.hasOptionalA).toEqual(true);
   })
 
   it('should allow overriding with value', () => {
-    const injector = new Injector([
+    const [inject] = makeInjector([
       override(A).withValue({ foo: 'A' }),
     ]);
-    const c = injector.get(C);
-    const b = injector.get(B)
-    const a = injector.get(A);
+    const c = inject(C);
+    const b = inject(B)
+    const a = inject(A);
 
     expect(a.foo).toEqual('A');
     expect(b.bar).toEqual('bA');
@@ -139,13 +139,13 @@ describe('injector v2', () => {
   })
 
   it('should throw if override loop exists', () => {
-    const injector = new Injector([
+    const [inject] = makeInjector([
       override(A).withOther(A2),
       override(A2).withOther(A3),
       override(A3).withOther(A),
     ]);
     expect(() => {
-      injector.get(A);
+      inject(A);
     }).toThrowError(/^Circular override dependencies: A -> A2 -> A3 -> A$/);
   })
 })

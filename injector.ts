@@ -44,39 +44,40 @@ export function override<T>(overridden: InjectKey<T>) {
   };
 }
 
-export class Injector {
-  private instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
-  private overrides: Map<InjectKey<unknown>, InjectKey<unknown>>;
+export type InjectorFn = <T>(key: InjectKey<T>) => T;
 
-  constructor(overrides: Override<unknown>[] = []) {
-    this.overrides = new Map(overrides.map(o => [o.overridden, o.overrider]));
-  }
+export function makeInjector(overrides: Override<unknown>[] = []): [InjectorFn] {
 
-  public get<T>(key: InjectKey<T>): T {
-    return this._get(key, []);
-  }
+  const instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
+  const overridesMap: Map<InjectKey<unknown>, InjectKey<unknown>> = new Map(overrides.map(o => [o.overridden, o.overrider]));
 
-  private _get<T>(key: InjectKey<T>, overriddenKeys: InjectKey<T>[]): T {
-    if (this.overrides.has(key)) {
-      const overrider = this.overrides.get(key) as InjectKey<T>;
+  const get: InjectorFn = <T>(key: InjectKey<T>): T => {
+    return _get(key, []);
+  };
+
+  function _get<T>(key: InjectKey<T>, overriddenKeys: InjectKey<T>[]): T {
+    if (overridesMap.has(key)) {
+      const overrider = overridesMap.get(key) as InjectKey<T>;
       const newOverriddenKeys = [...overriddenKeys, key];
       // Check for circular dependency
       if (newOverriddenKeys.includes(overrider)) {
         const message: string = [...newOverriddenKeys, overrider].map(k => k.injectableName).join(' -> ');
         throw new Error("Circular override dependencies: " + message);
       }
-      return this._get(overrider, newOverriddenKeys);
+      return _get(overrider, newOverriddenKeys);
     }
-    if (this.instances.has(key)) {
-      return this.instances.get(key);
+    if (instances.has(key)) {
+      return instances.get(key);
     }
-    const instance = this.create(key);
-    this.instances.set(key, instance);
+    const instance = create(key);
+    instances.set(key, instance);
     return instance;
   }
 
-  private create<T>(key: InjectKey<T>): T {
+  function create<T>(key: InjectKey<T>): T {
     const { factory } = metadata.get(key) as InjectableData<T>;
-    return factory(this.get.bind(this));
+    return factory(get);
   }
+
+  return [get];
 }
