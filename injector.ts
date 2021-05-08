@@ -6,17 +6,19 @@ class InjectKey<T> {
 }
 export type { InjectKey };
 
+export type InjectFn = <T>(key: InjectKey<T>) => T;
+
 export type InjectedValue<K extends InjectKey<unknown>> = K extends InjectKey<infer T> ? T : never;
 
 interface InjectableData<T> {
-  factory: (inject: <U>(key: InjectKey<U>) => U) => T;
+  factory: (inject: InjectFn) => T;
 }
 
 const metadata = new WeakMap<InjectKey<unknown>, InjectableData<unknown>>();
 
 export function injectable<T>(
   name: string,
-  factory: (inject: <U>(key: InjectKey<U>) => U) => T,
+  factory: (inject: InjectFn) => T,
 ): InjectKey<T> {
   const key = new InjectKey<T>(name);
   metadata.set(key, {
@@ -43,8 +45,6 @@ export function override<T>(overridden: InjectKey<T>) {
     },
   };
 }
-
-export type InjectFn = <T>(key: InjectKey<T>) => T;
 
 export function makeInjector(overrides: Override<unknown>[] = []): [InjectFn] {
 
