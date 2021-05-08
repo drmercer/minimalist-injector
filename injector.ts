@@ -44,14 +44,14 @@ export function override<T>(overridden: InjectKey<T>) {
   };
 }
 
-export type InjectorFn = <T>(key: InjectKey<T>) => T;
+export type InjectFn = <T>(key: InjectKey<T>) => T;
 
-export function makeInjector(overrides: Override<unknown>[] = []): [InjectorFn] {
+export function makeInjector(overrides: Override<unknown>[] = []): [InjectFn] {
 
   const instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
   const overridesMap: Map<InjectKey<unknown>, InjectKey<unknown>> = new Map(overrides.map(o => [o.overridden, o.overrider]));
 
-  const get: InjectorFn = <T>(key: InjectKey<T>): T => {
+  const get: InjectFn = <T>(key: InjectKey<T>): T => {
     return _get(key, []);
   };
 
