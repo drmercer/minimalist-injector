@@ -110,6 +110,34 @@ export class OverrideBuilder<T> {
  *
  * Returns an array for future-compatibility, in case I ever have other things to
  * return in addition to the InjectFn.
+ *
+ * Example usage:
+ *
+ * ```ts
+ * const A = injectable('A', () => 'world');
+ *
+ * const A2 = injectable('A2', () => 'dependency injection');
+ *
+ * const B = injectable('B', inject => `Hello, ${inject(A)}`);
+ *
+ * // Basic usage:
+ *
+ * const [inject] = makeInjector();
+ *
+ * const b: string = inject(B);
+ *
+ * console.log(B); // 'Hello, world!'
+ *
+ * // With override:
+ *
+ * const [inject] = makeInjector([
+ *   override(A).withOther(B);
+ * ]);
+ *
+ * const b: string = inject(B);
+ *
+ * console.log(b); // 'Hello, dependency injection!'
+ * ```
  */
 export function makeInjector(overrides: Override<unknown>[] = []): [InjectFn] {
 
