@@ -1,0 +1,28 @@
+name: Build and tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Yarn install
+        run: yarn install
+
+      - name: Yarn build
+        run: yarn build
+
+      - name: Jest tests
+        run: yarn test
