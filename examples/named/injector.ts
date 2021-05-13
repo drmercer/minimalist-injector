@@ -1,4 +1,4 @@
-import { InjectFn, InjectKey, injectable as origInjectable } from '../../injector';
+import { Injector, InjectKey, injectable as origInjectable } from '../../injector';
 
 export * from '../../injector';
 
@@ -6,7 +6,7 @@ export const injectablesByName = origInjectable<Record<string, unknown>>('ByName
   return {}; // populated lazily in injectable() below.
 })
 
-export function injectable<T>(name: string, factory: (inject: InjectFn) => T): InjectKey<T> {
+export function injectable<T>(name: string, factory: (inject: Injector) => T): InjectKey<T> {
   return origInjectable(name, (inject) => {
     const value = factory(inject);
 

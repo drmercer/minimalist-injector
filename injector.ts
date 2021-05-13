@@ -1,6 +1,5 @@
 /**
- * A key for an injectable dependency. Can be exchanged for a T (the dependency itself) via an InjectFn,
- * such as the one passed to the injectable factory or the one returned from makeInjector().
+ * A key for an injectable dependency. Can be exchanged for a T (the dependency itself) via an Injector.
  */
 class InjectKey<T> {
   private IfYoureSeeingThisInAnErrorMessageItMeansYoureTryingToUseSomethingAsAnInjectKeyWhenItsNotOne!: T;
@@ -14,7 +13,7 @@ export type { InjectKey };
  * A function that takes an InjectKey and returns the value that key is mapped to, constructing the value
  * if necessary.
  */
-export type InjectFn = <T>(key: InjectKey<T>) => T;
+export type Injector = <T>(key: InjectKey<T>) => T;
 
 /**
  * A utility type that evaluates to the "T" given an InjectKey<T>. This allows you to do things like:
@@ -37,26 +36,26 @@ export type InjectFn = <T>(key: InjectKey<T>) => T;
 export type InjectedValue<K extends InjectKey<unknown>> = K extends InjectKey<infer T> ? T : never;
 
 interface InjectableData<T> {
-  factory: (inject: InjectFn) => T;
+  factory: (inject: Injector) => T;
 }
 
 const metadata = new WeakMap<InjectKey<unknown>, InjectableData<unknown>>();
 
 /**
- * Creates a new injectable (a "module" or "component" that can be obtained from an InjectFn), returning
+ * Creates a new injectable (a "module" or "component" that can be obtained from an Injector), returning
  * a new InjectKey that maps to that injectable.
  *
  * @param name
  *   The human-readable name of the component, for debugging.
  * @param factory
- *  The factory function that is invoked to create the value. The first parameter is an InjectFn that
+ *  The factory function that is invoked to create the value. The first parameter is an Injector that
  *   can be used to get the values of other injectables.
  * @returns
  *  The InjectKey corresponding to the new injectable.
  */
 export function injectable<T>(
   name: string,
-  factory: (inject: InjectFn) => T,
+  factory: (inject: Injector) => T,
 ): InjectKey<T> {
   const key = new InjectKey<T>(name);
   metadata.set(key, {
@@ -106,7 +105,7 @@ export class OverrideBuilder<T> {
 }
 
 /**
- * Creates a new dependency injector (an InjectFn) that uses the given overrides.
+ * Creates a new dependency injector (an `Injector`) that uses the given overrides.
  *
  * Example usage:
  *
@@ -136,12 +135,12 @@ export class OverrideBuilder<T> {
  * console.log(b); // 'Hello, dependency injection!'
  * ```
  */
-export function makeInjector(overrides: Override<unknown>[] = []): InjectFn {
+export function makeInjector(overrides: Override<unknown>[] = []): Injector {
 
   const instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
   const overridesMap: Map<InjectKey<unknown>, InjectKey<unknown>> = new Map(overrides.map(o => [o.overridden, o.overrider]));
 
-  const get: InjectFn = <T>(key: InjectKey<T>): T => {
+  const get: Injector = <T>(key: InjectKey<T>): T => {
     return _get(key, []);
   };
 
