@@ -1,7 +1,7 @@
 {
   "name": "@drmercer/injector",
-  "version": "0.1.2",
-  "description": "A minimal TypeScript depedency injector",
+  "version": "0.1.3",
+  "description": "A minimal TypeScript dependency injector",
   "main": "injector.js",
   "directories": {
     "example": "examples"
