@@ -1,0 +1,31 @@
+{
+  "name": "@drmercer/injector",
+  "version": "0.1.0",
+  "description": "A minimal TypeScript depedency injector",
+  "main": "injector.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drmercer/essential-injector.git"
+  },
+  "keywords": [
+    "di",
+    "dependency",
+    "injection",
+    "injector"
+  ],
+  "author": "Dan Mercer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/drmercer/essential-injector/issues"
+  },
+  "homepage": "https://github.com/drmercer/essential-injector#readme",
+  "devDependencies": {
+    "typescript": "^4.2.4"
+  }
+}
