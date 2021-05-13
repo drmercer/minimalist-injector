@@ -108,9 +108,6 @@ export class OverrideBuilder<T> {
 /**
  * Creates a new dependency injector (an InjectFn) that uses the given overrides.
  *
- * Returns an array for future-compatibility, in case I ever have other things to
- * return in addition to the InjectFn.
- *
  * Example usage:
  *
  * ```ts
@@ -122,7 +119,7 @@ export class OverrideBuilder<T> {
  *
  * // Basic usage:
  *
- * const [inject] = makeInjector();
+ * const inject = makeInjector();
  *
  * const b: string = inject(B);
  *
@@ -130,7 +127,7 @@ export class OverrideBuilder<T> {
  *
  * // With override:
  *
- * const [inject] = makeInjector([
+ * const inject = makeInjector([
  *   override(A).withOther(B);
  * ]);
  *
@@ -139,7 +136,7 @@ export class OverrideBuilder<T> {
  * console.log(b); // 'Hello, dependency injection!'
  * ```
  */
-export function makeInjector(overrides: Override<unknown>[] = []): [InjectFn] {
+export function makeInjector(overrides: Override<unknown>[] = []): InjectFn {
 
   const instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
   const overridesMap: Map<InjectKey<unknown>, InjectKey<unknown>> = new Map(overrides.map(o => [o.overridden, o.overrider]));
@@ -172,5 +169,5 @@ export function makeInjector(overrides: Override<unknown>[] = []): [InjectFn] {
     return factory(get);
   }
 
-  return [get];
+  return get;
 }

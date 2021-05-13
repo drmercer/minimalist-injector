@@ -20,7 +20,7 @@ const B = injectable('B', (inject) => {
 
 describe('named injector', () => {
   it('should apply named niceties', () => {
-    const [inject] = makeInjector();
+    const inject = makeInjector();
     const b = inject(B)
     const a = inject(A);
 
