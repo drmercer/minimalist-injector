@@ -54,19 +54,8 @@ const C = injectable((inject) => {
 
 // Type tests:
 
-// Should only be able to override a key with a key/value assignable to it
-makeInjector([
-  // @ts-expect-error Should reject because doesn't include `foo: string`
-  override(A).withValue({ foo2: 'A' }),
-]);
-
-// @ts-expect-error Should properly type the InjectKey based on the return value of the factory fn
-const BadReturnValue: InjectKey<{ a: boolean }> = injectable(
-  () => {
-    return {
-      b: true,
-    };
-  });
+// @ts-expect-error Should only be able to override a key with a key/value assignable to it
+override(A).withValue({ foo2: 'A' });
 
 class C1 {
   private foo: undefined;
@@ -78,10 +67,11 @@ class C2 extends C1 {
 const IC1 = injectable(() => new C1());
 const IC2 = injectable(() => new C2());
 
-makeInjector([
-  // @ts-expect-error Should not allow a subtype to be overridden with a parent type
-  override(IC2).withOther(IC1),
-]);
+// @ts-expect-error Should not allow a subtype to be overridden with a parent type
+override(IC2).withOther(IC1);
+
+// @ts-expect-error Should properly type the InjectKey based on the return value of the factory fn
+const BadReturnValue: InjectKey<string> = injectable(() => 1337);
 
 // Behavior tests:
 
