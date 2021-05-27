@@ -6,19 +6,19 @@ interface A {
 
 // The following 3 injectables all provide an implementation of the "A" interface
 
-const A = injectable((): A => {
+const A = injectable<A>(() => {
   return {
     foo: 'a',
   };
 });
 
-const A2 = injectable((): A => {
+const A2 = injectable<A>(() => {
   return {
     foo: 'a2',
   };
 });
 
-const A3 = injectable((): A => {
+const A3 = injectable<A>(() => {
   return {
     foo: 'a3',
   };
@@ -40,7 +40,7 @@ const B = injectable((inject) => {
 
 // This demonstrates how to express an optional dependency - just use a key that defaults to undefined, and
 // then override it in the injector if needed
-const OptionalA: InjectKey<A | undefined> = injectable(() => undefined);
+const OptionalA = injectable<A | undefined>(() => undefined);
 
 const C = injectable((inject) => {
   const a = inject(A);
