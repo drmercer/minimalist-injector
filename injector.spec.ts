@@ -69,20 +69,6 @@ const BadReturnValue: InjectKey<{ a: boolean }> = injectable(
     };
   });
 
-// @ts-expect-error Should complain if extra deps are expected
-const UndeclaredDep = injectable('UndeclaredDep', A, (a, b) => {
-  return {
-    foo: true,
-  };
-});
-
-// @ts-expect-error Should complain if deps are typed incorrectly
-const MisdeclaredDep = injectable('MisdeclaredDep', A, (a: { bar: string }) => {
-  return {
-    foo: true,
-  };
-});
-
 class C1 {
   private foo: undefined;
 }
