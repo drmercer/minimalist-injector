@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/drmercer/essential-injector.git"
+    "url": "git+https://github.com/drmercer/minimal-injector.git"
   },
   "keywords": [
     "di",
@@ -23,9 +23,9 @@
   "author": "Dan Mercer",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/drmercer/essential-injector/issues"
+    "url": "https://github.com/drmercer/minimal-injector/issues"
   },
-  "homepage": "https://github.com/drmercer/essential-injector#readme",
+  "homepage": "https://github.com/drmercer/minimal-injector#readme",
   "devDependencies": {
     "@types/jest": "^26.0.23",
     "jest": "^26.6.3",
