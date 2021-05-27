@@ -66,10 +66,13 @@ export function injectable<T>(
 
 /**
  * Specifies that `overrider` should be used when `overridden` is requested from this injector.
+ *
+ * These should be created using `override()` for type-safety. Otherwise, TS will allow the
+ * `overridden` value to be a subtype of the `overrider` value, which is incorrect.
  */
-export interface Override<T> {
+export interface Override<T, U extends T> {
   overridden: InjectKey<T>;
-  overrider: InjectKey<T>;
+  overrider: InjectKey<U>;
 }
 
 /**
@@ -87,7 +90,7 @@ export class OverrideBuilder<T> {
   /**
    * When `overridden` is requested, the `overrider` will be requested instead.
    */
-  public withOther(overrider: InjectKey<T>): Override<T> {
+  public withOther<U extends T>(overrider: InjectKey<U>): Override<T, U> {
     return { overridden: this.overridden, overrider };
   }
 
@@ -96,10 +99,10 @@ export class OverrideBuilder<T> {
    * @param value
    * @returns
    */
-  public withValue(value: T): Override<T> {
+  public withValue<U extends T>(value: U): Override<T, U> {
     return {
       overridden: this.overridden,
-      overrider: injectable<T>(`<explicit value overriding ${this.overridden.injectableName}>`, () => value),
+      overrider: injectable<U>(`<explicit value overriding ${this.overridden.injectableName}>`, () => value),
     };
   }
 }
@@ -135,7 +138,7 @@ export class OverrideBuilder<T> {
  * console.log(b); // 'Hello, dependency injection!'
  * ```
  */
-export function makeInjector(overrides: Override<unknown>[] = []): Injector {
+export function makeInjector(overrides: Override<unknown, unknown>[] = []): Injector {
 
   const instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
   const overridesMap: Map<InjectKey<unknown>, InjectKey<unknown>> = new Map(overrides.map(o => [o.overridden, o.overrider]));
