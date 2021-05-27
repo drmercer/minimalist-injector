@@ -2,12 +2,12 @@ import { Injector, InjectKey, injectable as origInjectable } from '../../injecto
 
 export * from '../../injector';
 
-export const injectablesByName = origInjectable<Record<string, unknown>>('ByName', () => {
+export const injectablesByName = origInjectable<Record<string, unknown>>(() => {
   return {}; // populated lazily in injectable() below.
 })
 
 export function injectable<T>(name: string, factory: (inject: Injector) => T): InjectKey<T> {
-  return origInjectable(name, (inject) => {
+  return origInjectable((inject) => {
     const value = factory(inject);
 
     if (typeof value === 'object' && !!value) {

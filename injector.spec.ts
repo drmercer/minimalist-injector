@@ -6,19 +6,19 @@ interface A {
 
 // The following 3 injectables all provide an implementation of the "A" interface
 
-const A = injectable('A', (): A => {
+const A = injectable((): A => {
   return {
     foo: 'a',
   };
 });
 
-const A2 = injectable('A2', (): A => {
+const A2 = injectable((): A => {
   return {
     foo: 'a2',
   };
 });
 
-const A3 = injectable('A3', (): A => {
+const A3 = injectable((): A => {
   return {
     foo: 'a3',
   };
@@ -26,7 +26,7 @@ const A3 = injectable('A3', (): A => {
 
 // Using a named interface for an injectable is nice, but not necessary - here's an example where TS
 // just infers the InjectKey's type from the factory function's return value:
-const B = injectable('B', (inject) => {
+const B = injectable((inject) => {
   const a = inject(A);
   function getA(): A {
     return a;
@@ -40,9 +40,9 @@ const B = injectable('B', (inject) => {
 
 // This demonstrates how to express an optional dependency - just use a key that defaults to undefined, and
 // then override it in the injector if needed
-const OptionalA: InjectKey<A | undefined> = injectable('OptionalA', () => undefined);
+const OptionalA: InjectKey<A | undefined> = injectable(() => undefined);
 
-const C = injectable('C', (inject) => {
+const C = injectable((inject) => {
   const a = inject(A);
   const b = inject(B);
   const maybeA = inject(OptionalA);
@@ -62,7 +62,6 @@ makeInjector([
 
 // @ts-expect-error Should properly type the InjectKey based on the return value of the factory fn
 const BadReturnValue: InjectKey<{ a: boolean }> = injectable(
-  'BadReturnValue',
   () => {
     return {
       b: true,
@@ -76,8 +75,8 @@ class C2 extends C1 {
   private bar: undefined;
 }
 
-const IC1 = injectable('IC1', () => new C1());
-const IC2 = injectable('IC2', () => new C2());
+const IC1 = injectable(() => new C1());
+const IC2 = injectable(() => new C2());
 
 makeInjector([
   // @ts-expect-error Should not allow a subtype to be overridden with a parent type
@@ -137,16 +136,5 @@ describe('injector v2', () => {
     expect(c.bagel).toEqual('cAbA');
 
     expect(b.getA()).toBe(a);
-  })
-
-  it('should throw if override loop exists', () => {
-    const inject = makeInjector([
-      override(A).withOther(A2),
-      override(A2).withOther(A3),
-      override(A3).withOther(A),
-    ]);
-    expect(() => {
-      inject(A);
-    }).toThrowError(/^Circular override dependencies: A -> A2 -> A3 -> A$/);
   })
 })

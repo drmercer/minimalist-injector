@@ -3,9 +3,7 @@
  */
 class InjectKey<T> {
   private IfYoureSeeingThisInAnErrorMessageItMeansYoureTryingToUseSomethingAsAnInjectKeyWhenItsNotOne!: T;
-  constructor(
-    public injectableName: string,
-  ) { }
+  constructor() { }
 }
 export type { InjectKey };
 
@@ -54,10 +52,9 @@ const metadata = new WeakMap<InjectKey<unknown>, InjectableData<unknown>>();
  *  The InjectKey corresponding to the new injectable.
  */
 export function injectable<T>(
-  name: string,
   factory: (inject: Injector) => T,
 ): InjectKey<T> {
-  const key = new InjectKey<T>(name);
+  const key = new InjectKey<T>();
   metadata.set(key, {
     factory,
   });
@@ -102,7 +99,7 @@ export class OverrideBuilder<T> {
   public withValue<U extends T>(value: U): Override<T, U> {
     return {
       overridden: this.overridden,
-      overrider: injectable<U>(`<explicit value overriding ${this.overridden.injectableName}>`, () => value),
+      overrider: injectable<U>(() => value),
     };
   }
 }
@@ -143,20 +140,10 @@ export function makeInjector(overrides: Override<unknown, unknown>[] = []): Inje
   const instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
   const overridesMap: Map<InjectKey<unknown>, InjectKey<unknown>> = new Map(overrides.map(o => [o.overridden, o.overrider]));
 
-  const get: Injector = <T>(key: InjectKey<T>): T => {
-    return _get(key, []);
-  };
-
-  function _get<T>(key: InjectKey<T>, overriddenKeys: InjectKey<T>[]): T {
-    if (overridesMap.has(key)) {
-      const overrider = overridesMap.get(key) as InjectKey<T>;
-      const newOverriddenKeys = [...overriddenKeys, key];
-      // Check for circular dependency
-      if (newOverriddenKeys.includes(overrider)) {
-        const message: string = [...newOverriddenKeys, overrider].map(k => k.injectableName).join(' -> ');
-        throw new Error("Circular override dependencies: " + message);
-      }
-      return _get(overrider, newOverriddenKeys);
+  function get<T>(key: InjectKey<T>): T {
+    const overrider: InjectKey<T> = overridesMap.get(key) as InjectKey<T>;
+    if (overrider) {
+      return get(overrider);
     }
     if (instances.has(key)) {
       return instances.get(key);
