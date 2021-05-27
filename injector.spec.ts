@@ -55,7 +55,7 @@ const C = injectable((inject) => {
 // Type tests:
 
 // @ts-expect-error Should only be able to override a key with a key/value assignable to it
-override(A).withValue({ foo2: 'A' });
+override(A).with({ foo2: 'A' });
 
 class C1 {
   private foo: undefined;
@@ -68,7 +68,7 @@ const IC1 = injectable(() => new C1());
 const IC2 = injectable(() => new C2());
 
 // @ts-expect-error Should not allow a subtype to be overridden with a parent type
-override(IC2).withOther(IC1);
+override(IC2).with(IC1);
 
 // @ts-expect-error Should properly type the InjectKey based on the return value of the factory fn
 const BadReturnValue: InjectKey<string> = injectable(() => 1337);
@@ -91,7 +91,7 @@ describe('injector v2', () => {
 
   it('should allow overriding with key', () => {
     const inject = makeInjector([
-      override(A).withOther(A2),
+      override(A).with(A2),
     ]);
     const c = inject(C);
     const b = inject(B)
@@ -106,7 +106,7 @@ describe('injector v2', () => {
 
   it('should allow overriding with key (optional dep, for demonstration)', () => {
     const inject = makeInjector([
-      override(OptionalA).withOther(A),
+      override(OptionalA).with(A),
     ]);
     const c = inject(C);
 
@@ -115,7 +115,7 @@ describe('injector v2', () => {
 
   it('should allow overriding with value', () => {
     const inject = makeInjector([
-      override(A).withValue({ foo: 'A' }),
+      override(A).with(injectable(() => ({ foo: 'A' }))),
     ]);
     const c = inject(C);
     const b = inject(B)

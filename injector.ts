@@ -76,32 +76,14 @@ export interface Override<T, U extends T> {
  * A utility for creating new Overrides.
  */
 export function override<T>(overridden: InjectKey<T>) {
-  return new OverrideBuilder(overridden);
-}
-
-export class OverrideBuilder<T> {
-  constructor(
-    public readonly overridden: InjectKey<T>,
-  ) { }
-
-  /**
-   * When `overridden` is requested, the `overrider` will be requested instead.
-   */
-  public withOther<U extends T>(overrider: InjectKey<U>): Override<T, U> {
-    return { overridden: this.overridden, overrider };
-  }
-
-  /**
-   * When `overridden` is requested, the given value will be used instead.
-   * @param value
-   * @returns
-   */
-  public withValue<U extends T>(value: U): Override<T, U> {
-    return {
-      overridden: this.overridden,
-      overrider: injectable<U>(() => value),
-    };
-  }
+  return {
+    /**
+     * When `overridden` is requested, the `overrider` will be requested instead.
+     */
+    with<U extends T>(overrider: InjectKey<U>): Override<T, U> {
+      return { overridden, overrider };
+    }
+  };
 }
 
 /**
@@ -127,7 +109,7 @@ export class OverrideBuilder<T> {
  * // With override:
  *
  * const inject = makeInjector([
- *   override(A).withOther(B);
+ *   override(A).with(B);
  * ]);
  *
  * const b: string = inject(B);
