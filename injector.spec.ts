@@ -83,6 +83,21 @@ const MisdeclaredDep = injectable('MisdeclaredDep', A, (a: { bar: string }) => {
   };
 });
 
+class C1 {
+  private foo: undefined;
+}
+class C2 extends C1 {
+  private bar: undefined;
+}
+
+const IC1 = injectable('IC1', () => new C1());
+const IC2 = injectable('IC2', () => new C2());
+
+makeInjector([
+  // @ts-expect-error Should not allow a subtype to be overridden with a parent type
+  override(IC2).withOther(IC1),
+]);
+
 // Behavior tests:
 
 describe('injector v2', () => {
