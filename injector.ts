@@ -67,10 +67,7 @@ export function injectable<T>(
  * These should be created using `override()` for type-safety. Otherwise, TS will allow the
  * `overridden` value to be a subtype of the `overrider` value, which is incorrect.
  */
-export interface Override<T, U extends T> {
-  overridden: InjectKey<T>;
-  overrider: InjectKey<U>;
-}
+export type Override<A, B extends A = A> = [overridden: InjectKey<A>, overrider: InjectKey<B>];
 
 /**
  * A utility for creating new Overrides.
@@ -81,7 +78,7 @@ export function override<T>(overridden: InjectKey<T>) {
      * When `overridden` is requested, the `overrider` will be requested instead.
      */
     with<U extends T>(overrider: InjectKey<U>): Override<T, U> {
-      return { overridden, overrider };
+      return [overridden, overrider];
     }
   };
 }
@@ -120,7 +117,7 @@ export function override<T>(overridden: InjectKey<T>) {
 export function makeInjector(overrides: Override<unknown, unknown>[] = []): Injector {
 
   const instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
-  const overridesMap: Map<InjectKey<unknown>, InjectKey<unknown>> = new Map(overrides.map(o => [o.overridden, o.overrider]));
+  const overridesMap: Map<InjectKey<unknown>, InjectKey<unknown>> = new Map(overrides);
 
   function get<T>(key: InjectKey<T>): T {
     const overrider: InjectKey<T> = overridesMap.get(key) as InjectKey<T>;
