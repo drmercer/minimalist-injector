@@ -22,8 +22,8 @@ See [`injector.spec.ts`](./injector.spec.ts) for more examples.
 
 ## Goals
 
-* Be type-safe. No runtime errors that aren't compile-time errors.
-* Be minimal. Anything nonessential is omitted.
+* Be type-safe. Prefer compilation errors over runtime errors.
+* Be minimal. Leave out any features that aren't essential.
 * Be Deno-compatible. Deno is great. :heart:
 * Be simple enough that you can understand it and then reimplement it yourself instead of adding another dependency to your `node_modules`. 🙃
 
