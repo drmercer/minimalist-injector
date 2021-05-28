@@ -70,17 +70,11 @@ export function injectable<T>(
 export type Override<A, B extends A = A> = [overridden: InjectKey<A>, overrider: InjectKey<B>];
 
 /**
- * A utility for creating new Overrides.
+ * A utility for creating new Overrides. Using this function (without explicit type params)
+ * ensures that `b` is actually assignable to `a`.
  */
-export function override<T>(overridden: InjectKey<T>) {
-  return {
-    /**
-     * When `overridden` is requested, the `overrider` will be requested instead.
-     */
-    with<U extends T>(overrider: InjectKey<U>): Override<T, U> {
-      return [overridden, overrider];
-    }
-  };
+export function override<A, B extends A>(a: InjectKey<A>, b: InjectKey<B>): Override<A, B> {
+  return [a, b];
 }
 
 /**
@@ -106,7 +100,7 @@ export function override<T>(overridden: InjectKey<T>) {
  * // With override:
  *
  * const inject = makeInjector([
- *   override(A).with(B);
+ *   override(A, B);
  * ]);
  *
  * const b: string = inject(B);
