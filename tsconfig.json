@@ -5,6 +5,11 @@
     "moduleResolution": "node",
     "strict": true,
     "declaration": true,
+
+    // Only for decorator-based example:
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
     "lib": [
       "esnext"
     ]
