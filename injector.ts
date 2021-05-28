@@ -33,11 +33,9 @@ export type Injector = <T>(key: InjectKey<T>) => T;
  */
 export type InjectedValue<K extends InjectKey<unknown>> = K extends InjectKey<infer T> ? T : never;
 
-interface InjectableData<T> {
-  factory: (inject: Injector) => T;
-}
+type Factory<T> = (inject: Injector) => T;
 
-const metadata = new WeakMap<InjectKey<unknown>, InjectableData<unknown>>();
+const factories = new WeakMap<InjectKey<unknown>, Factory<unknown>>();
 
 /**
  * Creates a new injectable (a "module" or "component" that can be obtained from an Injector), returning
@@ -55,9 +53,7 @@ export function injectable<T>(
   factory: (inject: Injector) => T,
 ): InjectKey<T> {
   const key = new InjectKey<T>();
-  metadata.set(key, {
-    factory,
-  });
+  factories.set(key, factory);
   return key;
 }
 
@@ -127,7 +123,7 @@ export function makeInjector(overrides: Override<unknown, unknown>[] = []): Inje
   }
 
   function create<T>(key: InjectKey<T>): T {
-    const { factory } = metadata.get(key) as InjectableData<T>;
+    const factory = factories.get(key) as Factory<T>;
     return factory(get);
   }
 
