@@ -9,7 +9,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "jest",
-    "preversion": "yarn build && yarn test"
+    "clean": "git clean -dfxe node_modules",
+    "preversion": "yarn clean && yarn build && yarn test"
   },
   "repository": {
     "type": "git",
