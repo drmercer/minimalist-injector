@@ -4,6 +4,26 @@
 
 A minimal, type-safe dependency injector written in TypeScript.
 
+# What is Dependency Injection?
+
+**_Dependency Injection_ (DI) is the practice of giving dependencies to software components from a central place that handles creating the dependencies, rather than having those components know how to create their dependencies themselves.**
+
+_Component_ in this sense means any discrete part of software, not just UI components (as the term "component" is used in modern UI frameworks). Components are composed together to form an application. When using Dependency Injection, the _dependency injector_ (also called an _assembler_ or _DI container_ in some literature) does the composing. This happens from a single place at the root of the application, known as the _composition root_.
+
+Dependency Injection provides Inversion of Control in the dependencies between components; instead of depending on a specific implementation of a dependency, a component simply depends on the interface, and the injector knows how to construct the appropriate component that satisfies that interface. This means components are less coupled together and can be more easily developed, tested, and reused independent of each other.
+
+Often, because of Object Oriented Programming's popularity, Dependency Injection deals with components that are classes. However, this doesn't have to be the case, especially in a language like JavaScript/ECMAScript that isn't primarily class-based. Accordingly, this dependency injector deals with components that are arbitrary values by using factory functions instead of classes.
+
+# How this injector works
+To declare a component, use `injectable`. (I use the term "injectable" to mean "DI component", inspired somewhat by Angular's terminology.)
+
+```ts
+import {injectable} from '@drmercer/injector';
+
+// TODO
+```
+
+
 ## Example usage:
 
 ```ts
