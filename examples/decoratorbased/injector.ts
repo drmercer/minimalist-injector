@@ -1,4 +1,4 @@
-import { injectable, InjectKey, makeInjector as originalMakeInjector } from '../../injector';
+import { injectable, InjectKey, makeInjector as _makeInjector } from '../../injector';
 import 'reflect-metadata';
 
 type Constructor<T> = { new(...args: any[]): T };
@@ -28,7 +28,7 @@ export function InjectableClass<T>(klass: Constructor<T>) {
 export function makeInjector() {
   // TODO add support for overrides - left as an exercise to the reader ;)
 
-  const inject = originalMakeInjector();
+  const inject = _makeInjector();
 
   return function <T>(klass: Constructor<T>): T {
     return inject(getInjectKey(klass));
