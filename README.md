@@ -1,6 +1,6 @@
 # @drmercer/injector
 
-![build status](https://github.com/drmercer/minimal-injector/actions/workflows/main.yml/badge.svg)
+![build status](https://github.com/drmercer/minimal-injector/actions/workflows/main.yml/badge.svg) ![npm (scoped)](https://img.shields.io/npm/v/@drmercer/injector?color=0aa)
 
 A minimal, type-safe dependency injector written in TypeScript.
 
