@@ -18,24 +18,50 @@ ${code}
 
 const dir = "./readme-test-files"
 const file = dir + "/code.deno.ts";
+const mapFile = dir + "/importmap.json";
 await Deno.mkdir(dir);
 await Deno.writeTextFile(file, code);
-
-const { diagnostics } = await Deno.emit(file, {
-  importMap: {
-    imports: {
-      "@drmercer/injector": "./injector.ts"
-    },
+await Deno.writeTextFile(mapFile, JSON.stringify({
+  imports: {
+    "@drmercer/injector": "../injector.ts"
   },
-  // This is only used for resolving relative paths in the import map
-  importMapPath: Deno.cwd() + "/nonexistent-import-map.json",
+}));
+
+let success = true;
+
+console.log("Running tests. Output:");
+
+const p = Deno.run({
+  cmd: [
+    Deno.execPath(),
+    "run",
+    "--quiet",
+    "--import-map",
+    mapFile,
+    file,
+  ],
+  stderr: "piped",
 });
+
+const rawError = await p.stderrOutput();
+
+const errorString = new TextDecoder().decode(rawError).trim();
+if (errorString) {
+  console.error("ERROR: Test file logged errors:");
+  console.error(errorString);
+  success = false;
+}
+
+const status = await p.status();
+if (status.code !== 0) {
+  console.error("ERROR: Test file exited with status code " + status.code);
+  success = false;
+}
 
 await Deno.remove(dir, { recursive: true });
 
-if (diagnostics.length) {
-  console.error(Deno.formatDiagnostics(diagnostics));
+if (!success) {
   Deno.exit(1);
 } else {
-  console.log("No type errors. Running tests");
+  console.log("Success!");
 }
