@@ -35,7 +35,7 @@ const Greeting = injectable<string>((inject) => `Hello, ${inject(Place)}!`);
 
 const inject = makeInjector();
 
-console.log(inject(Greeting)); // "Hello, world!"
+console.assert(inject(Greeting) === "Hello, world!");
 ```
 
 See [`injector.spec.ts`](./injector.spec.ts) for more examples.
