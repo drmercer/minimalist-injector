@@ -24,6 +24,12 @@ jobs:
       - name: Jest tests
         run: yarn test
 
+  test-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
       - name: Install Deno
         run: curl -fsSL https://deno.land/x/install/install.sh | sh
 
