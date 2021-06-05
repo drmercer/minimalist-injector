@@ -27,7 +27,7 @@ import {injectable} from '@drmercer/injector';
 ## Example usage:
 
 ```ts
-import {injectable, makeInjector} from '@drmercer/injector';
+import {makeInjector} from '@drmercer/injector';
 
 const Place = injectable<string>(() => 'world');
 
