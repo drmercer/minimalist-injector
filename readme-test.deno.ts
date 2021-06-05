@@ -8,7 +8,7 @@ const readme = await Deno.readTextFile("./README.md");
 const tokens: any[] = md.parse(readme);
 
 const code = tokens
-  .filter(t => t.type === 'fence')
+  .filter(t => t.type === 'fence' && t.info === 'ts')
   .map((t, i) => `// Code block #${i + 1}\n${t.content.trim()}`)
   .join('\n\n');
 
