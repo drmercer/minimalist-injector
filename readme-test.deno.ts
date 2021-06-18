@@ -7,14 +7,52 @@ const readme = await Deno.readTextFile("./README.md");
 
 const tokens: any[] = md.parse(readme);
 
-const code = tokens
+const blocksToSkip = new Set([
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+]);
+
+const globalImport = `import {injectable, makeInjector, override, InjectKey} from '@drmercer/injector';`
+
+const code = globalImport + '\n' + tokens
   .filter(t => t.type === 'fence' && t.info === 'ts')
-  .map((t, i) => `// Code block #${i + 1}\n${t.content.trim()}`)
-  .join('\n\n');
+  .map(t => t.content.trim())
+  .map(commentOutImports)
+  .reduceRight((acc, b, i) => {
+    return wrapCodeBlock(commentOutIf(blocksToSkip.has(i), b) + '\n\n' + acc, i)
+  }, '')
+
+function commentOutImports(code: string) {
+  return code.replaceAll(/^import .*$/mg, '// $&');
+}
+
+function wrapCodeBlock(block: string, index: number): string {
+  return `
+(function codeBlock${index}() {
+
+${block.trim()}
+}()); // end codeBlock${index}`
+}
+
+function commentOutIf(condition: boolean, block: string) {
+  return condition ? `/*\n${block.replaceAll('*/', '*\\/')}\n*/` : block;
+}
 
 console.log(`======== CODE ============
-${code}
+${withLineNumbers(code)}
 ==========================`);
+
+function withLineNumbers(code: string) {
+  return code
+    .split('\n')
+    .map((line, i) => `${String(i + 1).padEnd(4, ' ')} ${line}`)
+    .join('\n')
+}
 
 const dir = "./readme-test-files"
 const file = dir + "/code.deno.ts";
