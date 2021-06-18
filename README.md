@@ -1,6 +1,6 @@
 # @drmercer/injector
 
-![build status](https://github.com/drmercer/minimal-injector/actions/workflows/main.yml/badge.svg) ![npm (scoped)](https://img.shields.io/npm/v/@drmercer/injector?color=0aa)
+![build status](https://github.com/drmercer/minimal-injector/actions/workflows/main.yml/badge.svg) ![npm (scoped)](https://img.shields.io/npm/v/@drmercer/injector?color=0aa) [![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/raw.githubusercontent.com/drmercer/minimal-injector/master/injector.ts)
 
 A minimal, type-safe dependency injector written in TypeScript.
 
@@ -281,7 +281,9 @@ const get = makeInjector([
 console.assert(get(Greeting) === "Hello there!");
 ```
 
-See [`injector.spec.ts`](./injector.spec.ts) for more examples.
+Documentation can be found at
+[doc.deno.land](https://doc.deno.land/https/raw.githubusercontent.com/drmercer/minimal-injector/master/injector.ts),
+and you can check [`injector.spec.ts`](./injector.spec.ts) for more examples of basic usage.
 
 ## Goals
 
