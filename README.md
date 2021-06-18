@@ -239,6 +239,29 @@ const greeter = get(Greeter);
 greeter(); // logs 'Hello there!'
 ```
 
+# Implementation
+
+The full implementation can be found in [`injector.ts`](./injector.ts). The types are the most important part, shown below:
+
+```ts
+interface InjectKey<T> {
+  // this makes InjectKey covariant with T, and provides access to the factory for advanced usage
+  _create: (inject: Injector) => T;
+}
+
+declare type Injector = <T>(key: InjectKey<T>) => T;
+
+declare function injectable<T>(factory: (inject: Injector) => T): InjectKey<T>;
+
+declare type Override<A, B extends A> = [overridden: InjectKey<A>, overrider: InjectKey<B>];
+
+// The utility function for type safety we defined earlier
+declare function override<A, B extends A>(a: InjectKey<A>, b: InjectKey<B>): Override<A, B>;
+
+declare function makeInjector(overrides?: Override<unknown, unknown>[]): Injector;
+
+```
+
 # Example usage
 To declare a component, use `injectable`. (I use the term "injectable" to mean "DI component", inspired somewhat by Angular's terminology.)
 

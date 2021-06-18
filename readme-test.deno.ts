@@ -15,6 +15,7 @@ const blocksToSkip = new Set([
   6,
   7,
   8,
+  12,
 ]);
 
 const globalImport = `import {injectable, makeInjector, override, InjectKey} from '../injector.ts';`

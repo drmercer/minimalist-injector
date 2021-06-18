@@ -96,7 +96,7 @@ export function override<A, B extends A>(a: InjectKey<A>, b: InjectKey<B>): Over
  * console.log(b); // 'Hello, dependency injection!'
  * ```
  */
-export function makeInjector(overrides: Override<unknown, unknown>[] = []): Injector {
+export function makeInjector(overrides: Override<unknown>[] = []): Injector {
 
   const values: WeakMap<InjectKey<unknown>, any> = new WeakMap();
   const overridesMap: Map<InjectKey<unknown>, InjectKey<unknown>> = new Map(overrides);
