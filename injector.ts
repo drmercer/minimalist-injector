@@ -1,11 +1,13 @@
 /**
  * A key for an injectable dependency. Can be exchanged for a T (the dependency itself) via an Injector.
  */
-class InjectKey<T> {
-  private IfYoureSeeingThisInAnErrorMessageItMeansYoureTryingToUseSomethingAsAnInjectKeyWhenItsNotOne!: T;
-  constructor() { }
+export interface InjectKey<T> {
+  /**
+   * The default factory for this InjectKey. This is exposed for advanced usages, but you typically won't
+   * need this. Instead, pass this InjectKey to an Injector.
+   */
+  _create: (inject: Injector) => T;
 }
-export type { InjectKey };
 
 /**
  * A function that takes an InjectKey and returns the value that key is mapped to, constructing the value
@@ -33,28 +35,18 @@ export type Injector = <T>(key: InjectKey<T>) => T;
  */
 export type InjectedValue<K extends InjectKey<unknown>> = K extends InjectKey<infer T> ? T : never;
 
-type Factory<T> = (inject: Injector) => T;
-
-const factories = new WeakMap<InjectKey<unknown>, Factory<unknown>>();
-
 /**
  * Creates a new injectable (a "module" or "component" that can be obtained from an Injector), returning
  * a new InjectKey that maps to that injectable.
  *
- * @param name
- *   The human-readable name of the component, for debugging.
  * @param factory
  *  The factory function that is invoked to create the value. The first parameter is an Injector that
  *   can be used to get the values of other injectables.
  * @returns
  *  The InjectKey corresponding to the new injectable.
  */
-export function injectable<T>(
-  factory: (inject: Injector) => T,
-): InjectKey<T> {
-  const key = new InjectKey<T>();
-  factories.set(key, factory);
-  return key;
+export function injectable<T>(factory: (inject: Injector) => T): InjectKey<T> {
+  return { _create: factory };
 }
 
 /**
@@ -106,7 +98,7 @@ export function override<A, B extends A>(a: InjectKey<A>, b: InjectKey<B>): Over
  */
 export function makeInjector(overrides: Override<unknown, unknown>[] = []): Injector {
 
-  const instances: WeakMap<InjectKey<unknown>, any> = new WeakMap();
+  const values: WeakMap<InjectKey<unknown>, any> = new WeakMap();
   const overridesMap: Map<InjectKey<unknown>, InjectKey<unknown>> = new Map(overrides);
 
   function get<T>(key: InjectKey<T>): T {
@@ -114,17 +106,12 @@ export function makeInjector(overrides: Override<unknown, unknown>[] = []): Inje
     if (overrider) {
       return get(overrider);
     }
-    if (instances.has(key)) {
-      return instances.get(key);
+    if (values.has(key)) {
+      return values.get(key);
     }
-    const instance = create(key);
-    instances.set(key, instance);
-    return instance;
-  }
-
-  function create<T>(key: InjectKey<T>): T {
-    const factory = factories.get(key) as Factory<T>;
-    return factory(get);
+    const value = key._create(get);
+    values.set(key, value);
+    return value;
   }
 
   return get;
