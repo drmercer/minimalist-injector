@@ -17,7 +17,7 @@ const blocksToSkip = new Set([
   8,
 ]);
 
-const globalImport = `import {injectable, makeInjector, override, InjectKey} from '@drmercer/injector';`
+const globalImport = `import {injectable, makeInjector, override, InjectKey} from '../injector.ts';`
 
 const code = globalImport + '\n' + tokens
   .filter(t => t.type === 'fence' && t.info === 'ts')
@@ -56,14 +56,8 @@ function withLineNumbers(code: string) {
 
 const dir = "./readme-test-files"
 const file = dir + "/code.deno.ts";
-const mapFile = dir + "/importmap.json";
 await Deno.mkdir(dir);
 await Deno.writeTextFile(file, code);
-await Deno.writeTextFile(mapFile, JSON.stringify({
-  imports: {
-    "@drmercer/injector": "../injector.ts"
-  },
-}));
 
 let success = true;
 
@@ -74,8 +68,6 @@ const p = Deno.run({
     Deno.execPath(),
     "run",
     "--quiet",
-    "--import-map",
-    mapFile,
     file,
   ],
   stderr: "piped",
