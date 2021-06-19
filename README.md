@@ -285,14 +285,93 @@ Documentation can be found at
 [doc.deno.land](https://doc.deno.land/https/raw.githubusercontent.com/drmercer/minimal-injector/master/injector.ts),
 and you can check [`injector.spec.ts`](./injector.spec.ts) for more examples of basic usage.
 
-## Goals
+# Advanced usage
+
+## Optional dependencies
+
+Optional dependencies can be expressed in the regular TypeScript way - by just including `undefined` in the injected type! No special treatment needed!
+
+```ts
+const OptionalDep = injectable<Object|undefined>(() => undefined);
+```
+
+You could even make an `optionalInjectable` utility if you find yourself making optional dependencies a lot.
+
+```ts
+const optionalInjectable = <T>() => injectable<T|undefined>(() => undefined);
+
+const OptionalDep = optionalInjectable<Object>();
+```
+
+## Aliasing the inferred type of the injected value
+
+If you want a way to refer to the _type_ of an injectable without explicitly specifying that type, you can use the `InjectedValue` helper type. This is useful for injectables that are more complex. You can even name the resulting type alias the same as the injectable it corresponds to, since TypeScript types and variables are not ambiguous with each other, so the names don't collide.
+
+```ts
+import {injectable, InjectedValue} from '@drmercer/injector';
+
+type Dep = InjectedValue<typeof Dep>; // equivalent to type `{ foo(): void; bar(): void }`
+
+const Dep = injectable(() => {
+  return {
+    foo() {
+      console.log("foo");
+    },
+    bar() {
+      console.log("bar");
+    }
+  };
+});
+```
+
+## Specifying the interface separately
+
+On the other hand, sometimes you want to explicitly specify the interface separately from the injectable that implements it. You can do that easily:
+
+```ts
+interface Dep {
+  foo(): void;
+  bar(): void;
+}
+
+const Dep = injectable<Dep>(() => {
+  return {
+    foo() {
+      console.log("foo");
+    },
+    bar() {
+      console.log("bar");
+    }
+  };
+});
+```
+
+## Class-based injectables
+
+You can create class-based injectables out-of-the-box by defining static `InjectKey` property on each class, and then referencing that property to inject it in other classes.
+
+```ts
+class A {
+  static key = injectable<A>(() => new A());
+}
+
+class B {
+  static key = injectable<B>((inject) => new B(
+    inject(A.key),
+  ));
+
+  constructor(public a: A) { }
+}
+```
+
+# Project Goals
 
 * Be type-safe. Prefer compilation errors over runtime errors.
 * Be minimal. Leave out any features that aren't essential.
 * Be Deno-compatible. Deno is great. :heart:
 * Be simple enough that you can understand it and then reimplement it yourself instead of adding another dependency to your `node_modules`. 🙃
 
-## License
+# License
 
 The _code_ in this project (e.g. all my TypeScript/JavaScript files and code snippets) is licensed under CC0. It's effectively public domain.
 

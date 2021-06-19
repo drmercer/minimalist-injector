@@ -18,7 +18,7 @@ const blocksToSkip = new Set([
   12,
 ]);
 
-const globalImport = `import {injectable, makeInjector, override, InjectKey} from '../injector.ts';`
+const globalImport = `import {injectable, makeInjector, override, InjectKey, InjectedValue} from '../injector.ts';`
 
 // Wrap each block in a function, nesting them inside each other, to avoid name collisions
 // while still allowing later blocks to use things defined in earlier ones.
