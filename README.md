@@ -85,7 +85,7 @@ We'll figure out what the value actually _is_ later; at this point, we just know
 export type InjectKey<T>
 ```
 
-(Note: `InjectKey<T>` should be covariant with `T`. TypeScript determines variance automatically based on the structure of the type, so we'll keep that in mind when defining the implementation of `InjectKey`.)
+(Note: `InjectKey<T>` should be covariant with `T` (meaning if `Y` is assignable to `X`, then `InjectKey<Y>` should be assignable to `InjectKey<X>`). TypeScript determines variance automatically based on the structure of the type, so we'll keep that in mind when defining the implementation of `InjectKey`.)
 
 To put this `InjectKey` type in context, our injector will have some kind of way to get the value for a given key - something like this:
 
