@@ -2,10 +2,7 @@ name: Build and tests
 
 on:
   push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
-
   workflow_dispatch:
 
 jobs:
@@ -26,3 +23,15 @@ jobs:
 
       - name: Jest tests
         run: yarn test
+
+  test-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Deno
+        run: curl -fsSL https://deno.land/x/install/install.sh | sh
+
+      - name: Run REAMDE test
+        run: /home/runner/.deno/bin/deno run -A --unstable ./readme-test.deno.ts
