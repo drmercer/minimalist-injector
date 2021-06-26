@@ -43,7 +43,13 @@ ${block.trim()}
 }
 
 function commentOutIf(condition: boolean, block: string) {
-  return condition ? `/*\n${block.replaceAll('*/', '*\\/')}\n*/` : block;
+  if (condition) {
+    // remove inline comments to avoid messing with log checks later
+    const withoutLineComments = block.replaceAll(/\/\/.*$/mg, '')
+    return `/*\n${withoutLineComments.replaceAll('*/', '*\\/')}\n*/`;
+  } else {
+    return block;
+  }
 }
 
 console.log(`======== CODE ============
@@ -64,7 +70,7 @@ await Deno.writeTextFile(file, code);
 
 let success = true;
 
-console.log("Running tests. Output:");
+console.log("Running tests.");
 
 const p = Deno.run({
   cmd: [
@@ -74,11 +80,15 @@ const p = Deno.run({
     file,
   ],
   stderr: "piped",
+  stdout: "piped",
 });
 
-const rawError = await p.stderrOutput();
+const rawOutput = await p.output();
+const ouputString: string = new TextDecoder().decode(rawOutput);
 
-const errorString = new TextDecoder().decode(rawError).trim();
+const rawError = await p.stderrOutput();
+const errorString = new TextDecoder().decode(rawError);
+
 if (errorString) {
   console.error("ERROR: Test file logged errors:");
   console.error(errorString);
@@ -89,6 +99,20 @@ const status = await p.status();
 if (status.code !== 0) {
   console.error("ERROR: Test file exited with status code " + status.code);
   success = false;
+}
+
+const expectedLogs: string[] = [...code.matchAll(/\/\/ logs '(.*)'$/mg)]
+  .map(m => m[1]);
+const actualLogs = ouputString.trim().split('\n');
+
+for (let i = 0; i < Math.max(actualLogs.length, expectedLogs.length); i++) {
+  const expected = expectedLogs[i];
+  const actual = actualLogs[i];
+  if (expected !== actual) {
+    console.error(`Expected to see log message '${expected}' but saw '${actual}'.`)
+    success = false;
+    break; // only print first mismatch
+  }
 }
 
 await Deno.remove(dir, { recursive: true });
