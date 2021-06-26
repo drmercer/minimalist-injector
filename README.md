@@ -185,7 +185,7 @@ That's pretty cool. But there's a simplification we can do here (and we're in pu
 1. listing the other's key in the deps list, or
 2. passing the other's key to an injected Injector.
 
-Stare at that list long enough, and you'll realize that #1 could actually be implemented using #2. Solution 2 is the simpler solution for how to express dependencies. So, in our aggressive pursuit of simplicity, let's scrap the deps list entirely, and just pass the injector to each factory function.
+Stare at that list long enough, and you'll realize that #1 could actually be implemented using #2. (I'll show you how [later in this article](#deps-list).) Solution 2 is the simpler solution for how to express dependencies. So, in our aggressive pursuit of simplicity, let's scrap the deps list entirely, and just pass the injector to each factory function.
 
 ```ts
 const GreetingSubject: InjectKey<string> = injectable(getGreetingSubject);
@@ -362,6 +362,46 @@ class B {
 
   constructor(public a: A) { }
 }
+```
+
+## Deps list
+
+If you prefer to list your dependencies up-front, you can make a higher-order function to do that:
+
+```ts
+import {InjectKey, InjectedValue} from '@drmercer/injector';
+
+type InjectKeyValues<KeyList extends InjectKey<unknown>[]> = {
+  [K in keyof KeyList]: KeyList[K] extends InjectKey<unknown> ? InjectedValue<KeyList[K]> : never;
+}
+
+function withDeps<T, InjectKeys extends InjectKey<unknown>[]>(depKeys: InjectKeys, f: (...deps: InjectKeyValues<InjectKeys>) => T) {
+  return (inject: Injector): T => {
+    const fulfilledDeps = depKeys.map(inject) as any;
+    return f(...fulfilledDeps);
+  };
+}
+```
+
+Side note: it's unfortunate we have to use a type assertion (`as any`) here, but I haven't found a way around it. I think it would require TypeScript to support higher-order types (types of types). Let me know if you know a way to do it.
+
+Here's what it would look like to use that with the example from earlier:
+
+```ts
+const GreetingSubject: InjectKey<string> = injectable(getGreetingSubject);
+
+const Greeting: InjectKey<string> = injectable(withDeps([GreetingSubject], getGreeting))
+
+const Greeter: InjectKey<() => void> = injectable(withDeps([Greeting], getGreeter));
+
+const CivilizedGreetingSubject: InjectKey<string> = injectable(() => 'there');
+
+const get = makeInjector([
+  override(GreetingSubject, CivilizedGreetingSubject),
+]);
+
+const greeter = get(Greeter);
+greeter(); // logs 'Hello there!'
 ```
 
 # Project Goals
