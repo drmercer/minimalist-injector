@@ -404,6 +404,31 @@ const greeter = get(Greeter);
 greeter(); // logs 'Hello there!'
 ```
 
+## Async dependencies
+
+Async dependencies are really easy to do with ES modules' [dynamic import](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#dynamic_imports) syntax:
+
+```ts
+// greeting.ts
+import { injectable } from '@drmercer/injector';
+
+export default Greeting = injectable(() => 'Hello!');
+```
+
+```ts
+const AsyncGreeter = injectable(inject => {
+  return async () => {
+    const greeting = await import('./greeting.js').then(inject);
+    console.log(greeting);
+  };
+});
+
+const get = makeInjector();
+
+const greeter = get(Greeter);
+await greeter(); // logs 'Hello there!'
+```
+
 # Project Goals
 
 * Be type-safe. Prefer compilation errors over runtime errors.
